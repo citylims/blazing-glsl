@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'pigeonworks:glitchy',
+  name: 'pigeonworks:blazingglsl',
   version: '0.0.1',
   summary: '',
   git: '',
@@ -38,6 +38,6 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use('ecmascript');
   api.use('tinytest');
-  api.use('pigeonworks:glitchy');
+  api.use('pigeonworks:blazingglsl');
   api.mainModule('glitchy-tests.js');
 });
