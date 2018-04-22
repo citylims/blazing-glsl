@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'pigeonworks:blazingglsl',
+  name: 'pigeonworks:blazing-glsl',
   version: '0.0.1',
   summary: '',
   git: '',
@@ -38,6 +38,6 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use('ecmascript');
   api.use('tinytest');
-  api.use('pigeonworks:blazingglsl');
+  api.use('pigeonworks:blazing-glsl');
   api.mainModule('glitchy-tests.js');
 });
