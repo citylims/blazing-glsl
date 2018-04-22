@@ -16,7 +16,7 @@ Package.onUse(function(api) {
   api.use('ecmascript');
   api.use('tracker');
   api.use('templating', 'client');
-  api.mainModule('glitchyApi.js');
+  api.mainModule('blazingApi.js');
   api.addFiles([
     'client/glitchy.html',
     'client/glitchy.js',
@@ -30,14 +30,8 @@ Package.onUse(function(api) {
     'private/glitchImage.vs',
   ], ['client', 'server']);
   api.addFiles([
-    'glsl/shaders.js',
+    'glsl/glitchy/shaders.js',
+    'glsl/glitchy/glitchyApi.js',
     'server/methods.js'
   ], 'server');
-});
-
-Package.onTest(function(api) {
-  api.use('ecmascript');
-  api.use('tinytest');
-  api.use('pigeonworks:blazing-glsl');
-  api.mainModule('glitchy-tests.js');
 });
