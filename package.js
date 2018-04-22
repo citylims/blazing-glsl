@@ -18,10 +18,10 @@ Package.onUse(function(api) {
   api.use('templating', 'client');
   api.mainModule('blazingApi.js');
   api.addFiles([
-    'client/glitchy.html',
-    'client/glitchy.js',
-    'client/glitchImage.js',
-    'client/glitchEffect.js'
+    'client/glitchy/glitchy.html',
+    'client/glitchy/glitchy.js',
+    'client/glitchy/glitchImage.js',
+    'client/glitchy/glitchEffect.js'
   ], 'client');
   api.addAssets([
     'private/glitchEffect.fs',  
