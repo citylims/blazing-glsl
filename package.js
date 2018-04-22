@@ -18,6 +18,9 @@ Package.onUse(function(api) {
   api.use('templating', 'client');
   api.mainModule('blazingApi.js');
   api.addFiles([
+    'client/spider/spider.html',
+    'client/spider/spider.js',
+    'client/spider/spiderEffect.js',
     'client/glitchy/glitchy.html',
     'client/glitchy/glitchy.js',
     'client/glitchy/glitchImage.js',
@@ -32,6 +35,7 @@ Package.onUse(function(api) {
   api.addFiles([
     'glsl/glitchy/shaders.js',
     'glsl/glitchy/glitchyApi.js',
+    'glsl/spider/shaders.js',
     'server/methods.js'
   ], 'server');
 });
