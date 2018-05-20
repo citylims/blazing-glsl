@@ -9,41 +9,45 @@ Template.glitchy.onCreated(function() {
   this.loadedEffect = new ReactiveVar(false)
   this.activeScene = new ReactiveVar(false);
   this.glitchFactor = new ReactiveVar(0);
+  this.glitchDir = new ReactiveVar('/');
  });
  
  Template.glitchy.helpers({
-   glitchFactor: function() {
-     return `${Template.instance().glitchFactor.get().toFixed(2)}%`
-   }
- })
+  glitchFactor: function() {
+    return `${Template.instance().glitchFactor.get().toFixed(2)}%`
+  } ,
+  isBird: function() {
+    if (Template.instance().glitchDir.get() === '/bird') {
+      return true;
+    }
+  }
+});
 
 Template.glitchy.events({
   'click [data-action="restart"]': function(e,t) {
     console.log(e);
-    t.loadedImage.set(false);
-    t.loadedEffect.set(false);
-    if (t.activeScene.get()) {
-      let scene = t.activeScene.get();
-      while(scene.children.length > 0){ 
-        scene.remove(scene.children[0]); 
-      }
-    }
-    // this.createGlitch();
+    t.cycleScene();
+    // if (t.activeScene.get()) {
+    //   let scene = t.activeScene.get();
+    //   while(scene.children.length > 0){ 
+    //     scene.remove(scene.children[0]); 
+    //   }
+    // }
+    t.createGlitch(t.glitchDir.get());
   },
+  'click [data-action="toggleDir"]': function(e,t) {
+    t.cycleScene();
+    if (t.glitchDir.get() === '/') {
+      t.glitchDir.set('/bird');
+    } else {
+      t.glitchDir.set('/');
+    }
+  }
 });
 
 Template.glitchy.onRendered(function() {
   var inst = Template.instance();
-  
-  this.createGlitch = () => {
-    GlitchImage.createImage().then(function(res) {
-      inst.loadedImage.set(res);
-    });
-
-    GlitchEffect.createEffect(renderBack1.texture).then(function(res) {
-      inst.loadedEffect.set(res);
-    });
-  }
+  var dir = inst.glitchDir.get();
 
   const canvas = document.getElementById('glitchyCanvas');
   const renderer = new THREE.WebGLRenderer({
@@ -60,6 +64,28 @@ Template.glitchy.onRendered(function() {
   var mouse = new THREE.Vector2();
   document.addEventListener('mousemove', onMouseMove, false );
   document.addEventListener('mousedown', onMouseDown, false );
+  
+  this.createGlitch = (dir) => {
+    console.log(dir);
+    GlitchImage.createImage(dir).then(function(res) {
+      inst.loadedImage.set(res);
+    });
+
+    GlitchEffect.createEffect(renderBack1.texture).then(function(res) {
+      inst.loadedEffect.set(res);
+    });
+  }
+  
+  this.cycleScene = () => {
+    inst.loadedImage.set(false);
+    inst.loadedEffect.set(false);
+    if (inst.activeScene.get()) {
+      let scene = inst.activeScene.get();
+      while(scene.children.length > 0){ 
+        scene.remove(scene.children[0]); 
+      }
+    }
+  }
   
   function onMouseDown(e) {
     //freeze frame
@@ -88,6 +114,7 @@ Template.glitchy.onRendered(function() {
     renderer.setSize(document.body.clientWidth, window.innerHeight);
   }
   const render = () => {
+    if (!inst.activeScene.get()) return;
     var time = clock.getDelta();
     renderer.render(sceneBack, cameraBack, renderBack1);
     var effect = inst.loadedEffect.get();
@@ -121,8 +148,14 @@ Template.glitchy.onRendered(function() {
       renderLoop();
     }
   });
+  
+  inst.autorun(() => {
+    if (inst.glitchDir.get()) {
+      this.createGlitch(inst.glitchDir.get());
+    }
+  })
   //call inital glitch
-  this.createGlitch();
+  this.createGlitch(dir);
 });
 
 

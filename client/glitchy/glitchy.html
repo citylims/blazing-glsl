@@ -3,11 +3,19 @@
     Glitchy
       <div class="gui">
         <div class="readout">{{glitchFactor}}</div>
-        <!-- <div class="restart" data-action="restart">
+        {{#if isBird}}
+          <div class="restart" data-action="toggleDir">
+            Bird
+          </div>  
+        {{else}}
+          <div class="restart" data-action="toggleDir">
+            Core
+          </div> 
+        {{/if}}
+        <div class="restart" data-action="restart">
           Restart
-        </div>   -->
+        </div>  
       </div>
-      
     <canvas id="glitchyCanvas">
     </canvas>
   </div>
