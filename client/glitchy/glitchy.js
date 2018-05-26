@@ -20,6 +20,11 @@ Template.glitchy.onCreated(function() {
     if (Template.instance().glitchDir.get() === '/bird') {
       return true;
     }
+  },
+  isCam: function() {
+    if (Template.instance().glitchDir.get() === '/cam') {
+      return true;
+    }
   }
 });
 
@@ -42,6 +47,15 @@ Template.glitchy.events({
     } else {
       t.glitchDir.set('/');
     }
+  },
+  'click [data-action="toggleCam"]': function(e,t) {
+    t.cycleScene();
+    t.glitchDir.set('/cam')
+    // if (t.glitchDir.get() === '/') {
+    //   t.glitchDir.set('/bird');
+    // } else {
+    //   t.glitchDir.set('/');
+    // }
   }
 });
 
@@ -91,6 +105,7 @@ Template.glitchy.onRendered(function() {
     //freeze frame
     inst.glitchFactor.set(0.01);
     mouse.x = 0.01;
+    mouse.y = 2.00
   }
 
   function onMouseMove(e) {
@@ -99,7 +114,22 @@ Template.glitchy.onRendered(function() {
     var xFactor = (e.clientX / rangeX) * 100;
     var glitchFactorX = parseFloat(glitchScale * (xFactor * 0.01));
     mouse.x = glitchFactorX;
-    inst.glitchFactor.set(glitchFactorX);
+    
+    var rangeY = parseInt($('#glitchyCanvas').innerHeight());
+    var yScale = 100.0
+    var yFactor = (e.clientY / rangeY) * 100;
+    var scaleDiff = 3;
+    var min = 3.0
+    var glitchFactorY = (parseFloat(yScale * (yFactor * 0.01))) / scaleDiff;
+    // console.log(e.clientY)
+    // console.log(glitchFactorY)
+    if (glitchFactorY < min) {
+      mouse.y = 2.00
+    } else {
+      mouse.y = glitchFactorY;
+    }
+    console.log(mouse.y)
+    // inst.glitchFactor.set(glitchFactorX);
   	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
   
@@ -119,7 +149,7 @@ Template.glitchy.onRendered(function() {
     renderer.render(sceneBack, cameraBack, renderBack1);
     var effect = inst.loadedEffect.get();
     if (effect) {
-      effect.render(time, mouse.x);
+      effect.render(time, mouse.x, mouse.y);
     }
     renderer.render(scene, camera);
   }

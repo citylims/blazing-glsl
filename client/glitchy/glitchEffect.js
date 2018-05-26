@@ -9,7 +9,11 @@ export const createEffect = function(texture) {
         type: 'f',
         value: 0
       },
-      mousePosition: {
+      mousePositionX: {
+        type: 'f',
+        value: 0
+      },
+      mousePositionY: {
         type: 'f',
         value: 0
       },
@@ -22,11 +26,14 @@ export const createEffect = function(texture) {
         value: texture,
       },
     };
-    effect.render = (time, pos) => {
+    effect.render = (time, posX, posY) => {
       if (effect.uniforms) {
         effect.uniforms.time.value += time;
-        if (pos) {
-          effect.uniforms.mousePosition.value = pos;
+        if (posX) {
+          effect.uniforms.mousePositionX.value = posX;
+        }
+        if (posY) {
+          effect.uniforms.mousePositionY.value = posY;
         }
       }
     }
