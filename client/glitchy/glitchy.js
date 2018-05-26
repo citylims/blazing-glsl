@@ -8,13 +8,17 @@ Template.glitchy.onCreated(function() {
   this.loadedImage = new ReactiveVar(false)
   this.loadedEffect = new ReactiveVar(false)
   this.activeScene = new ReactiveVar(false);
-  this.glitchFactor = new ReactiveVar(0);
+  this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
   this.glitchDir = new ReactiveVar('/');
  });
  
  Template.glitchy.helpers({
-  glitchFactor: function() {
-    return `${Template.instance().glitchFactor.get().toFixed(2)}%`
+  glitchFactor: function(axis) {
+    if (axis === 'x') {
+      return `${Template.instance().glitchFactor.get().glitchFactorX.toFixed(0)}%`
+    } else {
+      return `${Template.instance().glitchFactor.get().glitchFactorY.toFixed(0)}%`
+    }
   } ,
   isBird: function() {
     if (Template.instance().glitchDir.get() === '/bird') {
@@ -80,7 +84,6 @@ Template.glitchy.onRendered(function() {
   document.addEventListener('mousedown', onMouseDown, false );
   
   this.createGlitch = (dir) => {
-    console.log(dir);
     GlitchImage.createImage(dir).then(function(res) {
       inst.loadedImage.set(res);
     });
@@ -103,7 +106,7 @@ Template.glitchy.onRendered(function() {
   
   function onMouseDown(e) {
     //freeze frame
-    inst.glitchFactor.set(0.01);
+    inst.glitchFactor.set({glitchFactorX: 0, glitchFactorY: 0});
     mouse.x = 0.01;
     mouse.y = 2.00
   }
@@ -128,7 +131,11 @@ Template.glitchy.onRendered(function() {
     } else {
       mouse.y = glitchFactorY;
     }
-    console.log(mouse.y)
+    inst.glitchFactor.set({
+      glitchFactorX,
+      glitchFactorY
+    })
+    // console.log(mouse.y)
     // inst.glitchFactor.set(glitchFactorX);
   	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
   }
@@ -182,6 +189,33 @@ Template.glitchy.onRendered(function() {
   inst.autorun(() => {
     if (inst.glitchDir.get()) {
       this.createGlitch(inst.glitchDir.get());
+    }
+  });
+  
+  inst.autorun(() => {
+    var video      = document.createElement('video');
+    video.width    = 320;
+    video.height   = 240;
+    video.autoplay = true;
+    if (inst.glitchDir.get() === '/cam') {
+      inst.loadedImage.set(false)
+      inst.loadedEffect.set(false);
+      navigator.mediaDevices.getUserMedia({vide})
+        .then((stream) => {
+          console.log(stream);
+          video.src = webkitURL.createObjectURL(stream);
+          console.log(video);
+        }).catch((err) => {
+          console.log(err);
+        });
+      // var hasUserMedia = navigator.webkitGetUserMedia ? true : false;
+      //   navigator.webkitGetUserMedia('video', function(stream){
+      //   video.src  = webkitURL.createObjectURL(stream);
+      //   console.log('video')
+      //   console.log(video)
+      // }, function(error){
+      //   console.log("Failed to get a stream due to", error);
+      // });
     }
   })
   //call inital glitch

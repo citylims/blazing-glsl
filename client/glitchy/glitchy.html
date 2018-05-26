@@ -2,7 +2,8 @@
   <div id="glitchy">
     Glitchy
       <div class="gui">
-        <div class="readout">{{glitchFactor}}</div>
+        <div class="readout">X: {{glitchFactor "x"}}</div>
+        <div class="readout">Y: {{glitchFactor "y"}}</div>
         {{#if isBird}}
           <div class="restart" data-action="toggleDir">
             Bird
