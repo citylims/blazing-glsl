@@ -121,12 +121,13 @@ const effectFrag = function() {
 
     float y = vUv.y * resolution.y;
     float rgbWave = (
-        snoise3(vec3(0.0, y * 0.01, time * 400.0), mousePositionY) * (2.0 + strengthRGB * 32.0)
-        * snoise3(vec3(0.0, y * 0.02, time * 200.0), mousePositionY) * (1.0 + strengthRGB * 4.0)
+        snoise3(vec3(0.0, y * 0.01, time * 400.0), mousePositionX) * (2.0 + strengthRGB * 32.0)
+        * snoise3(vec3(0.0, y * 0.02, time * 200.0), mousePositionX) * (1.0 + strengthRGB * 4.0)
+        // THESE ARE THE ROWS LINES
         + step(0.9995, sin(y * 0.005 + time * 1.6)) * 12.0
         + step(0.9999, sin(y * 0.005 + time * 2.0)) * -18.0
       ) / resolution.x;
-    float rgbDiff = (6.0 + sin(time * 500.0 + vUv.y * 40.0) * (20.0 * strength + 1.0)) / resolution.x;
+    float rgbDiff = (6.0 + sin(time * 500.0 + vUv.y * 40.0) * (20.0 * strengthRGB + 1.0)) / resolution.x;
     float rgbUvX = vUv.x + rgbWave;
     
     // vec2 shake = vec2(strength * 8.0 + 0.5) * vec2(
@@ -144,7 +145,7 @@ const effectFrag = function() {
     float g = texture2D(texture, vec2(rgbUvX, vUv.y)).g;
     float b = texture2D(texture, vec2(rgbUvX - rgbDiff, vUv.y)).b;
 
-    float whiteNoise = (random(vUv + mod(time, 10.0)) * 2.0 - 1.0) * (0.15 + strength * 0.15);
+    float whiteNoise = (random(vUv + mod(time, 10.0)) * 2.0 - 1.0) * (0.15 + strengthRGB * 0.15);
 
     float bnTime = floor(time * 20.0) * 200.0;
     float noiseX = step((snoise3(vec3(0.0, vUv.x * 3.0, bnTime), mousePositionX) + 1.0) / 2.0, 0.12 + strength * 0.3);

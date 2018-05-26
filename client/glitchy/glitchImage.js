@@ -26,7 +26,6 @@ export const createImage = function(dir) {
     // console.log(Session.get('hello'))
     loader.setCrossOrigin("*");
     // let dir = "";
-    console.log(dir);
     Meteor.call('listS3Images', dir,  function(err, images) {
       var image = images[Math.floor(Math.random()*images.length)];
       loader.load(`${image}`, (texture) => {
