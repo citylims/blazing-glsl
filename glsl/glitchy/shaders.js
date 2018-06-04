@@ -121,14 +121,31 @@ const effectFrag = function() {
 
     float y = vUv.y * resolution.y;
     float rgbWave = (
-        snoise3(vec3(0.0, y * 0.01, time * 400.0), mousePositionX) * (2.0 + strengthRGB * 32.0)
-        * snoise3(vec3(0.0, y * 0.02, time * 200.0), mousePositionX) * (1.0 + strengthRGB * 4.0)
+        snoise3(vec3(0.0, y * 0.01, time * 400.0), dynInterval(mousePositionY)) * (2.0 + strength * 32.0)
+        * snoise3(vec3(0.0, y * 0.02, time * 200.0), dynInterval(mousePositionY)) * (1.0 + strength * 4.0)
         // THESE ARE THE ROWS LINES
-        + step(0.9995, sin(y * 0.005 + time * 1.6)) * 12.0
-        + step(0.9999, sin(y * 0.005 + time * 2.0)) * -18.0
+        // + step(0.9995, sin(y * 0.005 + time * strengthRGB)) * mousePositionX // this is cool allows you to offset image with x axis when step paused
+        // + step(0.9999, sin(y * 0.005 + time * 9.0)) * 5.0
+        // + step(0.9999, sin(y * 0.005 + time * 2.0)) * 19.0
+        // + step(0.9999, sin(y * 0.005 + time * 4.0)) * dynInterval(mousePositionY)
       ) / resolution.x;
+      
+    const float MAX_ITERATIONS = 6.0;
+    float counter = 0.0;
+    float dynWave;
+    // Go through the remaining 8 vertical samples (4 on each side of the center)
+    for (float i = 1.0; i <= MAX_ITERATIONS; i += 1.0) {
+      if (i >= counter){
+        // rgbWave = rgbWave / resolution.x;
+        break;
+      }
+      
+      dynWave = rgbWave + step(0.9999, sin(y * 0.005 + time * 2.0)) * counter;
+      counter++;
+    }
+    // float dynWave = rgbWave / resolution.x
     float rgbDiff = (6.0 + sin(time * 500.0 + vUv.y * 40.0) * (20.0 * strengthRGB + 1.0)) / resolution.x;
-    float rgbUvX = vUv.x + rgbWave;
+    float rgbUvX = vUv.x + dynWave;
     
     // vec2 shake = vec2(strength * 8.0 + 0.5) * vec2(
     //   random(vec2(time)) * 2.0 - 1.0,
