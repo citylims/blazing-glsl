@@ -8,8 +8,18 @@ Template.glitchy.onCreated(function() {
   this.loadedImage = new ReactiveVar(false)
   this.loadedEffect = new ReactiveVar(false)
   this.activeScene = new ReactiveVar(false);
+  this.toggleUpload = new ReactiveVar(false);
+  this.uploader = new ReactiveVar(false);
+  this.file = new ReactiveVar(false);
+  this.activeUrl = new ReactiveVar(false);
   this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
   this.glitchDir = new ReactiveVar('/');
+  
+  Slingshot.fileRestrictions("myFileUploads", {
+    allowedFileTypes: ["image/png", "image/jpeg", "image/gif", "application/pdf"],
+    maxSize: null
+  });
+
  });
  
  Template.glitchy.helpers({
@@ -29,6 +39,9 @@ Template.glitchy.onCreated(function() {
     if (Template.instance().glitchDir.get() === '/cam') {
       return true;
     }
+  },
+  isUpload: function() {
+    return Template.instance().toggleUpload.get()
   }
 });
 
@@ -52,14 +65,47 @@ Template.glitchy.events({
       t.glitchDir.set('/');
     }
   },
-  'click [data-action="toggleCam"]': function(e,t) {
-    t.cycleScene();
-    t.glitchDir.set('/cam')
+  'click [data-action="toggleUpload"]': function(e,t) {
+    t.toggleUpload.set(!t.toggleUpload.get());
+    
+    // t.cycleScene();
+    // t.glitchDir.set('/cam')
     // if (t.glitchDir.get() === '/') {
     //   t.glitchDir.set('/bird');
     // } else {
     //   t.glitchDir.set('/');
     // }
+  },
+  'change #inputFile': function(e,t) {
+    t.uploader.set(false);
+    var file = document.getElementById('inputFile').files[0];
+    if (!file) return;
+    var metaContext = {text: 'test'};
+    var uploader = new Slingshot.Upload('pigeonUpload', metaContext); 
+    t.file.set(file);
+    t.uploader.set(uploader);
+    uploader.send(document.getElementById('inputFile').files[0], (err, downloadUrl) => {
+      if (err) {
+        alert('failed to upload')
+        console.log('Error upload');
+        console.log(err);
+        t.file.set(false);
+      } else {
+        console.log(downloadUrl);
+        t.activeUrl.set(downloadUrl);
+          t.cycleScene();
+          t.createUploadGlitch(downloadUrl);
+          t.toggleUpload.set(false);
+        // t.activeUrl.set(downloadUrl);
+        // var updateParams = {
+        //   fileName: file.name,
+        //   fileType: file.type,
+        //   dateModified: file.lastModifiedDate,
+        //   url: downloadUrl
+        // }
+        //save in mongo?
+      }
+    });
   }
 });
 
@@ -84,7 +130,17 @@ Template.glitchy.onRendered(function() {
   document.addEventListener('mousedown', onMouseDown, false );
   
   this.createGlitch = (dir) => {
-    GlitchImage.createImage(dir).then(function(res) {
+    GlitchImage.createImageFromList(dir).then(function(res) {
+      inst.loadedImage.set(res);
+    });
+
+    GlitchEffect.createEffect(renderBack1.texture).then(function(res) {
+      inst.loadedEffect.set(res);
+    });
+  }
+  
+  this.createUploadGlitch = (imageUrl) => {
+    GlitchImage.createImageFromUrl(imageUrl).then(function(res) {
       inst.loadedImage.set(res);
     });
 
@@ -127,7 +183,7 @@ Template.glitchy.onRendered(function() {
     // console.log(e.clientY)
     // console.log(glitchFactorY)
     if (glitchFactorY < min) {
-      mouse.y = 2.00
+      mouse.y = 3.00
     } else {
       mouse.y = glitchFactorY;
     }
@@ -191,33 +247,40 @@ Template.glitchy.onRendered(function() {
       this.createGlitch(inst.glitchDir.get());
     }
   });
-  
   inst.autorun(() => {
-    var video      = document.createElement('video');
-    video.width    = 320;
-    video.height   = 240;
-    video.autoplay = true;
-    if (inst.glitchDir.get() === '/cam') {
-      inst.loadedImage.set(false)
-      inst.loadedEffect.set(false);
-      navigator.mediaDevices.getUserMedia({vide})
-        .then((stream) => {
-          console.log(stream);
-          video.src = webkitURL.createObjectURL(stream);
-          console.log(video);
-        }).catch((err) => {
-          console.log(err);
-        });
-      // var hasUserMedia = navigator.webkitGetUserMedia ? true : false;
-      //   navigator.webkitGetUserMedia('video', function(stream){
-      //   video.src  = webkitURL.createObjectURL(stream);
-      //   console.log('video')
-      //   console.log(video)
-      // }, function(error){
-      //   console.log("Failed to get a stream due to", error);
-      // });
+    if (inst.activeUrl.get()) {
+      console.log('gotem')
+      // inst.cycleScene();
+      // inst.createUploadGlitch(inst.activeUrl.get());
     }
-  })
+  });
+  
+  // inst.autorun(() => {
+  //   var video      = document.createElement('video');
+  //   video.width    = 320;
+  //   video.height   = 240;
+  //   video.autoplay = true;
+  //   if (inst.glitchDir.get() === '/cam') {
+  //     inst.loadedImage.set(false)
+  //     inst.loadedEffect.set(false);
+  //     navigator.mediaDevices.getUserMedia({vide})
+  //       .then((stream) => {
+  //         console.log(stream);
+  //         video.src = webkitURL.createObjectURL(stream);
+  //         console.log(video);
+  //       }).catch((err) => {
+  //         console.log(err);
+  //       });
+  //     // var hasUserMedia = navigator.webkitGetUserMedia ? true : false;
+  //     //   navigator.webkitGetUserMedia('video', function(stream){
+  //     //   video.src  = webkitURL.createObjectURL(stream);
+  //     //   console.log('video')
+  //     //   console.log(video)
+  //     // }, function(error){
+  //     //   console.log("Failed to get a stream due to", error);
+  //     // });
+  //   }
+  // });
   //call inital glitch
   this.createGlitch(dir);
 });

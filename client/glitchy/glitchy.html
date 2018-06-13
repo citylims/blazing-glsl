@@ -13,9 +13,14 @@
             Core
           </div> 
         {{/if}}
-        <div class="restart" data-action="toggleCam">
-          Cam
+        <div class="restart" data-action="toggleUpload">
+          Upload
         </div> 
+        {{#if isUpload}}
+          <div class="restart">
+            <input type="file" id="inputFile"/>
+          </div>
+        {{/if}}
         <div class="restart" data-action="restart">
           Restart
         </div>  
