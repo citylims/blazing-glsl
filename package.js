@@ -15,6 +15,7 @@ Package.onUse(function(api) {
   api.versionsFrom('1.4.4.1');
   api.use('ecmascript');
   api.use('tracker');
+  api.use('session');
   api.use('templating', 'client');
   api.mainModule('blazingApi.js');
   api.addFiles([
@@ -23,6 +24,8 @@ Package.onUse(function(api) {
     'client/spider/spiderEffect.js',
     'client/glitchy/glitchy.html',
     'client/glitchy/glitchy.js',
+    'client/glitchy/glitchCam.html',
+    'client/glitchy/glitchCam.js',
     'client/glitchy/glitchImage.js',
     'client/glitchy/glitchEffect.js'
   ], 'client');

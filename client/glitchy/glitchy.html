@@ -1,31 +1,44 @@
 <template name="glitchy">
-  <div id="glitchy">
-    Glitchy
-      <div class="gui">
-        <div class="readout">X: {{glitchFactor "x"}}</div>
-        <div class="readout">Y: {{glitchFactor "y"}}</div>
-        {{#if isBird}}
-          <div class="restart" data-action="toggleDir">
-            Bird
-          </div>  
-        {{else}}
-          <div class="restart" data-action="toggleDir">
-            Core
-          </div> 
-        {{/if}}
-        <div class="restart" data-action="toggleUpload">
-          Upload
-        </div> 
-        {{#if isUpload}}
-          <div class="restart">
-            <input type="file" id="inputFile"/>
-          </div>
-        {{/if}}
-        <div class="restart" data-action="restart">
-          Restart
-        </div>  
+  <div>
+    <canvas id="glitchyCanvas" style="{{glitchVisibility}}"></canvas>
+    {{#unless camToggled}}  
+      <div id="glitchy">
+        Glitchy
+          <div class="gui">
+            <div class="readout">X: {{glitchFactor "x"}}</div>
+            <div class="readout">Y: {{glitchFactor "y"}}</div>
+            {{#if isBird}}
+              <div class="restart" data-action="toggleDir">
+                Bird
+              </div>  
+            {{else}}
+              <div class="restart" data-action="toggleDir">
+                Core
+              </div> 
+            {{/if}}
+            <div class="restart" data-action="toggleUpload">
+              Upload
+            </div> 
+            <div class="restart" data-action="toggleCam">
+              Cam
+            </div> 
+            {{#if isUpload}}
+              <div class="restart">
+                <input type="file" id="inputFile"/>
+              </div>
+            {{/if}}
+            <div class="restart" data-action="restart">
+              Restart
+            </div>  
+          </div>    
       </div>
-    <canvas id="glitchyCanvas">
-    </canvas>
+    {{else}}
+      {{> glitchCam}}
+      <div class="gui">
+        <div class="restart" data-action="toggleCam">
+          Cam
+        </div> 
+      </div>
+    {{/unless}}
   </div>
 </template>

@@ -14,6 +14,7 @@ Template.glitchy.onCreated(function() {
   this.activeUrl = new ReactiveVar(false);
   this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
   this.glitchDir = new ReactiveVar('/');
+  this.camToggled = new ReactiveVar(false);
   
   Slingshot.fileRestrictions("myFileUploads", {
     allowedFileTypes: ["image/png", "image/jpeg", "image/gif", "application/pdf"],
@@ -35,17 +36,26 @@ Template.glitchy.onCreated(function() {
       return true;
     }
   },
-  isCam: function() {
-    if (Template.instance().glitchDir.get() === '/cam') {
-      return true;
-    }
-  },
   isUpload: function() {
-    return Template.instance().toggleUpload.get()
+    return Template.instance().toggleUpload.get();
+  },
+  camToggled: function() {
+    return Template.instance().camToggled.get();
+  },
+  glitchVisiblity: function() {
+    if (Template.instance().camToggled.get()) {
+      return 'visbility:hidden;';
+    } else {
+      return '';
+    }
   }
 });
 
 Template.glitchy.events({
+  'click [data-action="toggleCam"]': function(e,t){
+    t.camToggled.set(!t.camToggled.get());
+    t.cycleScene();
+  },
   'click [data-action="restart"]': function(e,t) {
     console.log(e);
     t.cycleScene();
@@ -67,14 +77,6 @@ Template.glitchy.events({
   },
   'click [data-action="toggleUpload"]': function(e,t) {
     t.toggleUpload.set(!t.toggleUpload.get());
-    
-    // t.cycleScene();
-    // t.glitchDir.set('/cam')
-    // if (t.glitchDir.get() === '/') {
-    //   t.glitchDir.set('/bird');
-    // } else {
-    //   t.glitchDir.set('/');
-    // }
   },
   'change #inputFile': function(e,t) {
     t.uploader.set(false);
@@ -140,6 +142,8 @@ Template.glitchy.onRendered(function() {
   }
   
   this.createUploadGlitch = (imageUrl) => {
+    inst.camToggled.set(false);
+    
     GlitchImage.createImageFromUrl(imageUrl).then(function(res) {
       inst.loadedImage.set(res);
     });
@@ -249,38 +253,19 @@ Template.glitchy.onRendered(function() {
   });
   inst.autorun(() => {
     if (inst.activeUrl.get()) {
-      console.log('gotem')
-      // inst.cycleScene();
-      // inst.createUploadGlitch(inst.activeUrl.get());
+      
     }
   });
   
-  // inst.autorun(() => {
-  //   var video      = document.createElement('video');
-  //   video.width    = 320;
-  //   video.height   = 240;
-  //   video.autoplay = true;
-  //   if (inst.glitchDir.get() === '/cam') {
-  //     inst.loadedImage.set(false)
-  //     inst.loadedEffect.set(false);
-  //     navigator.mediaDevices.getUserMedia({vide})
-  //       .then((stream) => {
-  //         console.log(stream);
-  //         video.src = webkitURL.createObjectURL(stream);
-  //         console.log(video);
-  //       }).catch((err) => {
-  //         console.log(err);
-  //       });
-  //     // var hasUserMedia = navigator.webkitGetUserMedia ? true : false;
-  //     //   navigator.webkitGetUserMedia('video', function(stream){
-  //     //   video.src  = webkitURL.createObjectURL(stream);
-  //     //   console.log('video')
-  //     //   console.log(video)
-  //     // }, function(error){
-  //     //   console.log("Failed to get a stream due to", error);
-  //     // });
-  //   }
-  // });
+  inst.autorun(() => {
+    if (Session.get('camUrl')) {
+      // inst.cycleScene();
+      console.log(Session.get('camUrl'));
+      var url = Session.get('camUrl');
+      // inst.camToggled.set(false);
+      inst.createUploadGlitch(url)
+    }
+  });
   //call inital glitch
   this.createGlitch(dir);
 });
