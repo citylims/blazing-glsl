@@ -15,6 +15,8 @@ Template.glitchy.onCreated(function() {
   this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
   this.glitchDir = new ReactiveVar('/');
   this.camToggled = new ReactiveVar(false);
+  this.audioViz = new ReactiveVar(true);
+  this.song = new ReactiveVar(false);
   
   Slingshot.fileRestrictions("myFileUploads", {
     allowedFileTypes: ["image/png", "image/jpeg", "image/gif", "application/pdf"],
@@ -42,6 +44,12 @@ Template.glitchy.onCreated(function() {
   camToggled: function() {
     return Template.instance().camToggled.get();
   },
+  camToggled: function() {
+    return Template.instance().camToggled.get();
+  },
+  audioVizToggled: function() {
+    return Template.instance().audioViz.get();
+  },
   glitchVisiblity: function() {
     if (Template.instance().camToggled.get()) {
       return 'visbility:hidden;';
@@ -57,7 +65,6 @@ Template.glitchy.events({
     t.cycleScene();
   },
   'click [data-action="restart"]': function(e,t) {
-    console.log(e);
     t.cycleScene();
     // if (t.activeScene.get()) {
     //   let scene = t.activeScene.get();
@@ -77,6 +84,9 @@ Template.glitchy.events({
   },
   'click [data-action="toggleUpload"]': function(e,t) {
     t.toggleUpload.set(!t.toggleUpload.get());
+  },
+  'click [data-action="audioViz"]': function(e,t) {
+    t.audioViz.set(!t.audioViz.get());
   },
   'change #inputFile': function(e,t) {
     t.uploader.set(false);
@@ -114,6 +124,8 @@ Template.glitchy.events({
 Template.glitchy.onRendered(function() {
   var inst = Template.instance();
   var dir = inst.glitchDir.get();
+  
+  
 
   const canvas = document.getElementById('glitchyCanvas');
   const renderer = new THREE.WebGLRenderer({
@@ -130,6 +142,24 @@ Template.glitchy.onRendered(function() {
   var mouse = new THREE.Vector2();
   document.addEventListener('mousemove', onMouseMove, false );
   document.addEventListener('mousedown', onMouseDown, false );
+  
+  var audioListener = new THREE.AudioListener();
+  camera.add( audioListener );
+  var song = new THREE.Audio( audioListener );
+  scene.add( song );
+  // instantiate a loader
+  var audioLoader = new THREE.AudioLoader();
+  var analyser = new THREE.AudioAnalyser( song, 32 );
+  
+  audioLoader.load( 'audio/Poisonous-Gas.mp3', ( audioBuffer ) => {
+    
+		song.setBuffer( audioBuffer );
+    inst.song.set(song);
+		// song.play();
+    analyser = new THREE.AudioAnalyser( song, 32 );
+	});
+  
+  
   
   this.createGlitch = (dir) => {
     GlitchImage.createImageFromList(dir).then(function(res) {
@@ -215,11 +245,24 @@ Template.glitchy.onRendered(function() {
     var time = clock.getDelta();
     renderer.render(sceneBack, cameraBack, renderBack1);
     var effect = inst.loadedEffect.get();
-    if (effect) {
-      effect.render(time, mouse.x, mouse.y);
+    if (inst.audioViz.get()) {
+      var roo  = analyser.getFrequencyData();
+      // console.log(roo);
+      // console.log(mouse.x)
+      // console.log(roo[roo.length - 1])
+      if (effect) {
+        effect.render(time, (roo[roo.length -1] /2 ), roo[roo.length - 2] / 4.5);
+        // effect.render(time, mouse.x, mouse.y);
+      }
+    } else {
+      if (effect) {
+        effect.render(time, mouse.x, mouse.y);
+      }
     }
+  
     renderer.render(scene, camera);
   }
+  
   const renderLoop = () => {
     render();
     requestAnimationFrame(renderLoop);
@@ -251,11 +294,19 @@ Template.glitchy.onRendered(function() {
       this.createGlitch(inst.glitchDir.get());
     }
   });
+
   inst.autorun(() => {
-    if (inst.activeUrl.get()) {
+    if (inst.song.get()) {
+      var song = inst.song.get();
+      if (inst.audioViz.get()) {
+        song.play();
+      } else if (!inst.audioViz.get()) {
+        song.stop();
+      }
       
     }
-  });
+  })
+  
   
   inst.autorun(() => {
     if (Session.get('camUrl')) {
