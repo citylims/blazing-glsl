@@ -246,13 +246,12 @@ Template.glitchy.onRendered(function() {
     renderer.render(sceneBack, cameraBack, renderBack1);
     var effect = inst.loadedEffect.get();
     if (inst.audioViz.get()) {
-      var roo  = analyser.getFrequencyData();
-      // console.log(roo);
-      // console.log(mouse.x)
-      // console.log(roo[roo.length - 1])
+      var audioData  = analyser.getFrequencyData();
+      // hardcode range
+      var noise = ([audioData[audioData.length - 1] /2);
+      var shake = ([audioData[audioData.length - 2] / 4.5);
       if (effect) {
-        effect.render(time, (roo[roo.length -1] /2 ), roo[roo.length - 2] / 4.5);
-        // effect.render(time, mouse.x, mouse.y);
+        effect.render(time, noise, shake;
       }
     } else {
       if (effect) {
