@@ -13,7 +13,9 @@ Template.glitchy.onCreated(function() {
   this.file = new ReactiveVar(false);
   this.activeUrl = new ReactiveVar(false);
   this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
-  this.glitchDir = new ReactiveVar('/');
+  this.glitchDir = new ReactiveVar('/winter');
+  this.moodName = new ReactiveVar('Winter');
+  this.glitchPair = new ReactiveVar(false);
   this.camToggled = new ReactiveVar(false);
   this.audioViz = new ReactiveVar(true);
   this.song = new ReactiveVar(false);
@@ -21,6 +23,36 @@ Template.glitchy.onCreated(function() {
   Slingshot.fileRestrictions("myFileUploads", {
     allowedFileTypes: ["image/png", "image/jpeg", "image/gif", "application/pdf"],
     maxSize: null
+  });
+  
+  this.autorun(() => {
+    if (this.moodName.get()) {
+      var moodName = this.moodName.get()
+      console.log(Moods.findOne({moodName: moodName}));
+      var mood = Moods.findOne({moodName: moodName});
+      console.log(mood);
+      if (mood && mood.pairs.length) {
+        var pair = mood.pairs[Math.floor(Math.random() * mood.pairs.length)];
+        console.log(pair);
+        this.glitchPair.set(pair);
+      }
+    }
+    // if (Moods.findOne({moodName: this.moodName.get()})) {
+    //   var mood = Moods.findOne({moodName: this.moodName});
+    //   console.log(mood);
+    // }
+    // if (Moods.find()) {
+    //   var moods = Moods.find().fetch();
+    //   console.log(moods);
+    //   if (moods && moods.length) {
+    //     if (moods.types[this.moodName.get()]pairs.length) { //always be there
+    //       var initialSet = moods.pairs[0];
+    //       // var initialSet = moods.pairs[Math.floor(Math.random()*moods.pairs.length]);
+    //       console.log(initialSet);
+    //       this.glitchPair.set(initialSet);
+    //     }    
+    //   }
+    // }
   });
 
  });
@@ -149,20 +181,30 @@ Template.glitchy.onRendered(function() {
   scene.add( song );
   // instantiate a loader
   var audioLoader = new THREE.AudioLoader();
-  var analyser = new THREE.AudioAnalyser( song, 32 );
-  
-  audioLoader.load( 'audio/Poisonous-Gas.mp3', ( audioBuffer ) => {
+  var analyser = new THREE.AudioAnalyser( song, 256 );
     
-		song.setBuffer( audioBuffer );
-    inst.song.set(song);
-		// song.play();
-    analyser = new THREE.AudioAnalyser( song, 32 );
-	});
+  // audioLoader.load( 'audio/MerryXmas.mp3', ( audioBuffer ) => {
+  //   
+	// 	song.setBuffer( audioBuffer );
+  //   inst.song.set(song);
+	// 	// song.play();
+  //   analyser = new THREE.AudioAnalyser( song, 256 );
+	// });
   
   
   
   this.createGlitch = (dir) => {
     GlitchImage.createImageFromList(dir).then(function(res) {
+      inst.loadedImage.set(res);
+    });
+
+    GlitchEffect.createEffect(renderBack1.texture).then(function(res) {
+      inst.loadedEffect.set(res);
+    });
+  }
+  
+  this.createGlitchPair = (imageUrl) => {
+    GlitchImage.createImageFromUrl(imageUrl).then(function(res) {
       inst.loadedImage.set(res);
     });
 
@@ -192,6 +234,12 @@ Template.glitchy.onRendered(function() {
         scene.remove(scene.children[0]); 
       }
     }
+  }
+  
+  this.calcAverageFreq = (arr) => {
+    var total = _.reduce(arr, function(memo, num) {return memo + num});;
+    // console.log(total)
+    return total / (arr.length * 2);
   }
   
   function onMouseDown(e) {
@@ -247,11 +295,16 @@ Template.glitchy.onRendered(function() {
     var effect = inst.loadedEffect.get();
     if (inst.audioViz.get()) {
       var audioData  = analyser.getFrequencyData();
-      // hardcode range
-      var noise = ([audioData[audioData.length - 1] /2);
-      var shake = ([audioData[audioData.length - 2] / 4.5);
+      if (!audioData.length) return;
+      var high = audioData.slice(0, audioData.length / 2);
+      var low = audioData.slice(audioData.length /2, audioData.length);
+      //half array top freq can be noise 
+      //low can be shake
+      var noiseFreq = (inst.calcAverageFreq(high) / 2);
+      // console.log(noiseFreq)
+      var shakeFreq = (inst.calcAverageFreq(low) / 3.5);
       if (effect) {
-        effect.render(time, noise, shake;
+        effect.render(time, noiseFreq, shakeFreq)
       }
     } else {
       if (effect) {
@@ -290,7 +343,17 @@ Template.glitchy.onRendered(function() {
   
   inst.autorun(() => {
     if (inst.glitchDir.get()) {
-      this.createGlitch(inst.glitchDir.get());
+      // this.createGlitch(inst.glitchDir.get());
+    }
+    if (inst.glitchPair.get()){
+      this.createGlitchPair(inst.glitchPair.get().visual.fileLocation)
+      audioLoader.load( inst.glitchPair.get().audio.fileLocation, ( audioBuffer ) => {
+        console.log('load song');
+    		song.setBuffer( audioBuffer );
+        inst.song.set(song);
+    		// song.play();
+        analyser = new THREE.AudioAnalyser( song, 256 );
+    	});
     }
   });
 
@@ -298,6 +361,7 @@ Template.glitchy.onRendered(function() {
     if (inst.song.get()) {
       var song = inst.song.get();
       if (inst.audioViz.get()) {
+        console.log(song);
         song.play();
       } else if (!inst.audioViz.get()) {
         song.stop();
@@ -317,7 +381,6 @@ Template.glitchy.onRendered(function() {
     }
   });
   //call inital glitch
-  this.createGlitch(dir);
+  // this.createGlitch(dir);
 });
-
 
