@@ -14,7 +14,7 @@ Template.glitchy.onCreated(function() {
   this.activeUrl = new ReactiveVar(false);
   this.glitchFactor = new ReactiveVar({glitchFactorX: 0.00, glitchFactorY: 0.00});
   this.glitchDir = new ReactiveVar('/winter');
-  this.moodName = new ReactiveVar('Winter');
+  this.glitchName = new ReactiveVar('IceChoir');
   this.glitchPair = new ReactiveVar(false);
   this.camToggled = new ReactiveVar(false);
   this.audioViz = new ReactiveVar(true);
@@ -26,33 +26,14 @@ Template.glitchy.onCreated(function() {
   });
   
   this.autorun(() => {
-    if (this.moodName.get()) {
-      var moodName = this.moodName.get()
-      console.log(Moods.findOne({moodName: moodName}));
-      var mood = Moods.findOne({moodName: moodName});
-      console.log(mood);
-      if (mood && mood.pairs.length) {
-        var pair = mood.pairs[Math.floor(Math.random() * mood.pairs.length)];
-        console.log(pair);
+    if (this.glitchName.get()) {
+      var glitchName = this.glitchName.get()
+      var glitch = Glitches.findOne({glitchName: glitchName});
+      if (glitch && glitch.pairs.length) {
+        var pair = glitch.pairs[Math.floor(Math.random() * glitch.pairs.length)];
         this.glitchPair.set(pair);
       }
     }
-    // if (Moods.findOne({moodName: this.moodName.get()})) {
-    //   var mood = Moods.findOne({moodName: this.moodName});
-    //   console.log(mood);
-    // }
-    // if (Moods.find()) {
-    //   var moods = Moods.find().fetch();
-    //   console.log(moods);
-    //   if (moods && moods.length) {
-    //     if (moods.types[this.moodName.get()]pairs.length) { //always be there
-    //       var initialSet = moods.pairs[0];
-    //       // var initialSet = moods.pairs[Math.floor(Math.random()*moods.pairs.length]);
-    //       console.log(initialSet);
-    //       this.glitchPair.set(initialSet);
-    //     }    
-    //   }
-    // }
   });
 
  });
