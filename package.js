@@ -24,6 +24,8 @@ Package.onUse(function(api) {
     'client/spider/spiderEffect.js',
     'client/glitchy/glitchy.html',
     'client/glitchy/glitchy.js',
+    'client/glitchy/glitchyGutter.html',
+    'client/glitchy/glitchyGutter.js',
     'client/glitchy/glitchCam.html',
     'client/glitchy/glitchCam.js',
     'client/glitchy/glitchImage.js',

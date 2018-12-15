@@ -1,0 +1,42 @@
+<template name="glitchyGutter">
+  <div id="gutter" class="{{#if gutterExpand}}expand{{/if}}">
+    <div class="gutter-row">
+      <div class="g-r-header">
+        <div class="carrot-icon" data-action="expandGutter"></div>
+      </div>
+      {{#if gutterExpand}}
+      <div class="g-r-options">
+        {{#if audioVizActive}}
+          <div class="option-btn" data-action="audioVizStop">
+            <div>stop</div>
+          </div>
+        {{else}}
+          <div class="option-btn" data-action="audioVizPlay">
+            <div>Play</div>
+          </div>
+        {{/if}}
+        <div class="option-btn" >
+          <select name="" data-action="glitchDropdown">
+            {{#each glitches}}
+              <option value="{{_id}}">{{glitchName}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="option-btn">
+          <div>X: {{glitchFactor.x}}</div>
+        </div>
+        <div class="option-btn">
+          <div>Y: {{glitchFactor.y}}</div>
+        </div>
+        <div class="option-btn" data-action="upload">
+          <div>Upload</div>
+        </div>
+        <div class="option-btn" data-action="cam">
+          <div>Cam</div>
+        </div>
+
+      </div>
+      {{/if}}
+    </div>
+  </div>
+</template>
