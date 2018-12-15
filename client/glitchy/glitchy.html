@@ -1,12 +1,13 @@
 <template name="glitchy">
   <div>
     <canvas id="glitchyCanvas" style="{{glitchVisibility}}"></canvas>
+    {{> glitchyGutter glitchFactor=glitchFactor}}
     {{#unless camToggled}}  
       <div id="glitchy">
         Glitchy
           <div class="gui">
-            <div class="readout">X: {{glitchFactor "x"}}</div>
-            <div class="readout">Y: {{glitchFactor "y"}}</div>
+            <div class="readout">X: {{glitchFactor.x}}</div>
+            <div class="readout">Y: {{glitchFactor.y}}</div>
             <div class="restart" data-action="audioViz">
               Audio Viz
             </div>

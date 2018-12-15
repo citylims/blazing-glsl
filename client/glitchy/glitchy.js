@@ -8,6 +8,7 @@ Session.setDefault('glitchName', 'Meow');
 
 Template.glitchy.onCreated(function() {
   this.loadedImage = new ReactiveVar(false)
+  this.unload = new ReactiveVar(false);
   this.loadedEffect = new ReactiveVar(false)
   this.activeScene = new ReactiveVar(false);
   this.toggleUpload = new ReactiveVar(false);
@@ -21,6 +22,7 @@ Template.glitchy.onCreated(function() {
   this.camToggled = new ReactiveVar(false);
   this.audioViz = new ReactiveVar(true);
   this.song = new ReactiveVar(false);
+  this.audioLoad = new ReactiveVar(false);
   
   Slingshot.fileRestrictions("myFileUploads", {
     allowedFileTypes: ["image/png", "image/jpeg", "image/gif", "application/pdf"],
@@ -28,24 +30,25 @@ Template.glitchy.onCreated(function() {
   });
   
   this.autorun(() => {
-    if (Session.get('glitchName')) {
-      var glitchName = Session.get('glitchName');
-      var glitch = Glitches.findOne({glitchName: glitchName});
-      if (glitch && glitch.pairs.length) {
-        var pair = glitch.pairs[Math.floor(Math.random() * glitch.pairs.length)];
-        this.glitchPair.set(pair);
+    if (Session.get('gutterEvent')) {
+      let gE = Session.get('gutterEvent');
+      console.log(gE)
+      switch(gE) {
+    		case "audioVizStop": this.audioViz.set(false); break;
+    		case "audioVizPlay": this.audioViz.set(true); break;
+    		case "cam": ; console.log('toggle cam');break;
+    		case "upload": console.log('up'); break;
       }
     }
-  });
+  })
 
  });
  
  Template.glitchy.helpers({
   glitchFactor: function(axis) {
-    if (axis === 'x') {
-      return `${Template.instance().glitchFactor.get().glitchFactorX.toFixed(0)}%`
-    } else {
-      return `${Template.instance().glitchFactor.get().glitchFactorY.toFixed(0)}%`
+    return {
+      x: `${Template.instance().glitchFactor.get().glitchFactorX.toFixed(0)}%`,
+      y: `${Template.instance().glitchFactor.get().glitchFactorY.toFixed(0)}%`
     }
   } ,
   // isBird: function() {
@@ -87,9 +90,9 @@ Template.glitchy.events({
   'click [data-action="toggleUpload"]': function(e,t) {
     t.toggleUpload.set(!t.toggleUpload.get());
   },
-  'click [data-action="audioViz"]': function(e,t) {
-    t.audioViz.set(!t.audioViz.get());
-  },
+  // 'click [data-action="audioViz"]': function(e,t) {
+  //   t.audioViz.set(!t.audioViz.get());
+  // },
   'change #inputFile': function(e,t) {
     t.uploader.set(false);
     var file = document.getElementById('inputFile').files[0];
@@ -294,6 +297,12 @@ Template.glitchy.onRendered(function() {
       cameraBack.lookAt(new THREE.Vector3());
       var img = this.loadedImage.get()
       var effect = this.loadedEffect.get()
+      while(sceneBack.children.length > 0){ 
+        sceneBack.remove(sceneBack.children[0]); 
+      }
+      while(scene.children.length > 0){ 
+        scene.remove(scene.children[0]); 
+      }
       sceneBack.add(img.mesh);
       scene.add(effect.mesh);
       inst.activeScene.set(scene);
@@ -302,9 +311,21 @@ Template.glitchy.onRendered(function() {
     }
   });
   
+  inst.autorun(() => {
+    if (Session.get('glitchName')) {
+      var glitchName = Session.get('glitchName');
+      var glitch = Glitches.findOne({glitchName: glitchName});
+      if (glitch && glitch.pairs.length) {
+        var pair = glitch.pairs[Math.floor(Math.random() * glitch.pairs.length)];
+        inst.glitchPair.set(pair);
+      }
+    }
+  });
+  
   //if glitchPair render glitch
   inst.autorun(() => {
     if (inst.glitchPair.get()){
+      inst.audioLoad.set(false);
       var glitch = inst.glitchPair.get();
       let vizPath = this.getVizPath(glitch.visual);
       let audPath = this.getAudPath(glitch.audio);
@@ -313,6 +334,7 @@ Template.glitchy.onRendered(function() {
         console.log('load song');
     		song.setBuffer(audioBuffer);
         inst.song.set(song); //autorun trigger .play
+        inst.audioLoad.set(true)
         analyser = new THREE.AudioAnalyser( song, 256 );
     	});
     }
@@ -321,16 +343,26 @@ Template.glitchy.onRendered(function() {
   //autoplay audio
   inst.autorun(() => {
     if (inst.song.get()) {
+      Session.set('unloadGlitch', false);
       var song = inst.song.get();
       if (inst.audioViz.get()) {
-        console.log(song);
         song.play();
       } else if (!inst.audioViz.get()) {
         song.stop();
-      }
-      
+      }  
     }
-  })
+  });
+  
+  inst.autorun(()=> {
+    if (Session.get('unloadGlitch')) {
+      var song = inst.song.get();
+      if (song && song.buffer) {
+        song.stop();
+      }
+      inst.loadedImage.set(false);
+      inst.loadedEffect.set(false);
+    }
+  });
   //upload from webcam  
   inst.autorun(() => {
     if (Session.get('camUrl')) {
@@ -343,3 +375,9 @@ Template.glitchy.onRendered(function() {
   });
 });
 
+Template.glitchy.onDestroyed(function() {
+  var song = Template.instance().song.get();
+  if (song && song.buffer) {
+    song.stop();
+  }
+});
