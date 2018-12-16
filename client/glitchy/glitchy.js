@@ -36,11 +36,23 @@ Template.glitchy.onCreated(function() {
       switch(gE) {
     		case "audioVizStop": this.audioViz.set(false); break;
     		case "audioVizPlay": this.audioViz.set(true); break;
-    		case "cam": ; console.log('toggle cam');break;
-    		case "upload": console.log('up'); break;
+    		case "cam": ; this.camToggled.set(true); break;
+    		case "upload": this.cycleScene(); break;
       }
     }
-  })
+  });
+
+  
+  this.cycleScene = () => {
+    this.loadedImage.set(false);
+    this.loadedEffect.set(false);
+    if (this.activeScene.get()) {
+      let scene = this.activeScene.get();
+      while(scene.children.length > 0){ 
+        scene.remove(scene.children[0]); 
+      }
+    }
+  }
 
  });
  
@@ -58,9 +70,6 @@ Template.glitchy.onCreated(function() {
   // },
   isUpload: function() {
     return Template.instance().toggleUpload.get();
-  },
-  camToggled: function() {
-    return Template.instance().camToggled.get();
   },
   camToggled: function() {
     return Template.instance().camToggled.get();
@@ -109,10 +118,10 @@ Template.glitchy.events({
         t.file.set(false);
       } else {
         console.log(downloadUrl);
-        t.activeUrl.set(downloadUrl);
-          t.cycleScene();
-          t.createUploadGlitch(downloadUrl);
-          t.toggleUpload.set(false);
+        // t.activeUrl.set(downloadUrl);
+          // t.cycleScene();
+          // t.createUploadGlitch(downloadUrl);
+          // t.toggleUpload.set(false);
         // t.activeUrl.set(downloadUrl);
         // var updateParams = {
         //   fileName: file.name,
@@ -120,7 +129,7 @@ Template.glitchy.events({
         //   dateModified: file.lastModifiedDate,
         //   url: downloadUrl
         // }
-        //save in mongo?
+        //save in mongo? form for creating new pair?
       }
     });
   }
@@ -193,17 +202,7 @@ Template.glitchy.onRendered(function() {
       inst.loadedEffect.set(res);
     });
   }
-  
-  this.cycleScene = () => {
-    inst.loadedImage.set(false);
-    inst.loadedEffect.set(false);
-    if (inst.activeScene.get()) {
-      let scene = inst.activeScene.get();
-      while(scene.children.length > 0){ 
-        scene.remove(scene.children[0]); 
-      }
-    }
-  }
+
   
   this.calcAverageFreq = (arr) => {
     var total = _.reduce(arr, function(memo, num) {return memo + num});;
@@ -373,6 +372,14 @@ Template.glitchy.onRendered(function() {
       inst.createUploadGlitch(url)
     }
   });
+  
+    inst.autorun(()=> {
+      if (Session.get('uploadUrl')) {
+        var url = Session.get('uploadUrl');
+        inst.createUploadGlitch(url);
+        // inst.toggleUpload.set(false);
+      }
+    });
 });
 
 Template.glitchy.onDestroyed(function() {

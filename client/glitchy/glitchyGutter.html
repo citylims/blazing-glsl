@@ -1,5 +1,5 @@
 <template name="glitchyGutter">
-  <div id="gutter" class="{{#if gutterExpand}}expand{{/if}}">
+  <div id="gutter" class="glitchy-gutter {{#if gutterExpand}}expand{{/if}}">
     <div class="gutter-row">
       <div class="g-r-header">
         <div class="carrot-icon" data-action="expandGutter"></div>
@@ -16,9 +16,9 @@
           </div>
         {{/if}}
         <div class="option-btn" >
-          <select name="" data-action="glitchDropdown">
+          <select name="" data-action="glitchDropdown" {{isSelected}}>
             {{#each glitches}}
-              <option value="{{_id}}">{{glitchName}}</option>
+              <option value="{{glitchName}}" {{isSelected}}>{{glitchName}}</option>
             {{/each}}
           </select>
         </div>
@@ -31,9 +31,21 @@
         <div class="option-btn" data-action="upload">
           <div>Upload</div>
         </div>
+        {{#if isUpload}}
+          {{#unless uploading}}
+            <div class="option-btn">
+              <input type="file" id="inputFile"/>
+            </div>
+          {{else}}
+            <div class="option-btn">
+              <div>Working on it.</div>
+            </div>
+          {{/unless}}
+        {{/if}}
         <div class="option-btn" data-action="cam">
           <div>Cam</div>
         </div>
+    
 
       </div>
       {{/if}}
