@@ -1,5 +1,5 @@
 Template.glitchyGutter.onCreated(function() {
-  this.expandGutter = new ReactiveVar(false);
+  this.expandGutter = new ReactiveVar(true);
   this.audioActive = new ReactiveVar(true);
   this.toggleUpload = new ReactiveVar(false);
   this.uploading = new ReactiveVar(false);
