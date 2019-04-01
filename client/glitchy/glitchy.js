@@ -60,7 +60,7 @@ Template.glitchy.onCreated(function() {
   glitchFactor: function(axis) {
     return {
       x: `${Template.instance().glitchFactor.get().glitchFactorX.toFixed(0)}%`,
-      y: `${Template.instance().glitchFactor.get().glitchFactorY.toFixed(0)}%`
+      y: `${Template.instance().glitchFactor.get().glitchFactorY.toFixed(0) * 3}%`
     }
   } ,
   // isBird: function() {
@@ -346,6 +346,7 @@ Template.glitchy.onRendered(function() {
       var song = inst.song.get();
       if (inst.audioViz.get()) {
         song.play();
+        // song.setVolume(0.1)
       } else if (!inst.audioViz.get()) {
         song.stop();
       }  

@@ -32,6 +32,9 @@ Template.glitchyGutter.helpers({
    },
    uploading: function(){
      return Template.instance().uploading.get();
+   },
+   computeY: function(y) {
+     return (y * 3).tofixed(0);
    }
 });
 
