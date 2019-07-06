@@ -41,17 +41,24 @@ Template.glitchy.onCreated(function() {
       }
     }
   });
+  
+  this.clearThree = (obj) => {
+    while(obj.children.length > 0){ 
+      this.clearThree(obj.children[0])
+      obj.remove(obj.children[0]);
+    }
+    if(obj.geometry) obj.geometry.dispose()
+    if(obj.material) obj.material.dispose()
+    if(obj.texture) obj.texture.dispose()
+  } 
 
   
   this.cycleScene = () => {
     this.loadedImage.set(false);
     this.loadedEffect.set(false);
-    if (this.activeScene.get()) {
-      let scene = this.activeScene.get();
-      while(scene.children.length > 0){ 
-        scene.remove(scene.children[0]); 
-      }
-    }
+    let active = this.activeScene.get();
+    this.clearThree(active.scene)
+    this.clearThree(active.sceneBack)
   }
 
  });
@@ -182,6 +189,7 @@ Template.glitchy.onRendered(function() {
   }
   
   this.createGlitchPair = (imageUrl) => {
+    console.log('abc');
     GlitchImage.createImageFromUrl(imageUrl).then(function(res) {
       inst.loadedImage.set(res);
     });
@@ -285,7 +293,7 @@ Template.glitchy.onRendered(function() {
   const renderLoop = () => {
     render();
     requestAnimationFrame(renderLoop);
-  }
+  }  
   
   // render loop after aud/viz reactive load.
   inst.autorun(() => {
@@ -296,15 +304,13 @@ Template.glitchy.onRendered(function() {
       cameraBack.lookAt(new THREE.Vector3());
       var img = this.loadedImage.get()
       var effect = this.loadedEffect.get()
-      while(sceneBack.children.length > 0){ 
-        sceneBack.remove(sceneBack.children[0]); 
-      }
-      while(scene.children.length > 0){ 
-        scene.remove(scene.children[0]); 
-      }
+      console.log(img)
+      console.log(effect);
+      inst.clearThree(scene)
+      inst.clearThree(sceneBack)
       sceneBack.add(img.mesh);
       scene.add(effect.mesh);
-      inst.activeScene.set(scene);
+      inst.activeScene.set({scene: scene, sceneBack: sceneBack});
       // on();
       renderLoop();
     }
@@ -377,6 +383,7 @@ Template.glitchy.onRendered(function() {
     inst.autorun(()=> {
       if (Session.get('uploadUrl')) {
         var url = Session.get('uploadUrl');
+        console.log('reload happens');
         inst.createUploadGlitch(url);
         // inst.toggleUpload.set(false);
       }
